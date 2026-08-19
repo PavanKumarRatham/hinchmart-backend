@@ -1,0 +1,17 @@
+package com.hinchmart.entity.enums;
+
+public enum NotificationType {
+    ORDER_PLACED,
+    ORDER_CONFIRMED,
+    PAYMENT_SUCCESS,
+    PAYMENT_FAILED,
+    PRODUCT_APPROVED,
+    PRODUCT_REJECTED,
+    RFQ_RECEIVED,
+    QUOTE_RECEIVED,
+    QUOTE_ACCEPTED,
+    ORDER_SHIPPED,
+    OUT_FOR_DELIVERY,
+    ORDER_DELIVERED,
+    LOW_STOCK
+}
