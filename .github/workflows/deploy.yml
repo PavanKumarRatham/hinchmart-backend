@@ -3,23 +3,31 @@ name: Build and Deploy Backend
 on:
   push:
     branches:
-     - pavansai/feature-branch
+      - pavansai/feature-branch
   workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
+  AWS_REGION: ap-south-2
   ECR_REPOSITORY: hinchmart
 
 jobs:
   build-push-deploy:
+    name: Build, Push to ECR and Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
+      # ============================================================
+      # 1. Checkout source code
+      # ============================================================
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ============================================================
+      # 2. Setup Java 21
+      # ============================================================
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
@@ -27,6 +35,9 @@ jobs:
           java-version: '21'
           cache: maven
 
+      # ============================================================
+      # 3. Build Spring Boot JAR
+      # ============================================================
       - name: Build Spring Boot JAR
         shell: bash
         run: |
@@ -37,17 +48,26 @@ jobs:
             mvn -B clean package -DskipTests
           fi
 
+      # ============================================================
+      # 4. Configure AWS credentials
+      # ============================================================
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
+      # ============================================================
+      # 5. Login to Amazon ECR
+      # ============================================================
       - name: Log in to Amazon ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
+      # ============================================================
+      # 6. Build and push Docker image to ECR
+      # ============================================================
       - name: Build and push Docker image
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-2.amazonaws.com
@@ -55,42 +75,88 @@ jobs:
         shell: bash
         run: |
           IMAGE="$ECR_REGISTRY/$ECR_REPOSITORY"
-          docker build --tag "$IMAGE:$IMAGE_TAG" --tag "$IMAGE:latest" .
+
+          echo "Building Docker image..."
+          docker build \
+            --tag "$IMAGE:$IMAGE_TAG" \
+            --tag "$IMAGE:latest" \
+            .
+
+          echo "Pushing image with commit tag..."
           docker push "$IMAGE:$IMAGE_TAG"
+
+          echo "Pushing latest image..."
           docker push "$IMAGE:latest"
 
+          echo "Docker image pushed successfully:"
+          echo "$IMAGE:$IMAGE_TAG"
+
+      # ============================================================
+      # 7. Deploy Docker image to EC2
+      # ============================================================
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.0
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_DDL_AUTO: ${{ secrets.DB_DDL_AUTO }}
+
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+
           envs: AWS_ACCOUNT_ID,DB_HOST,DB_PORT,DB_NAME,DB_USERNAME,DB_PASSWORD,DB_DDL_AUTO
+
           script_stop: true
+
           script: |
             set -eu
 
+            # ========================================================
+            # ECR configuration
+            # ========================================================
             ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.ap-south-2.amazonaws.com"
             IMAGE="${ECR_REGISTRY}/hinchmart:latest"
 
-            aws ecr get-login-password --region ap-south-2 | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
+            echo "Logging into ECR..."
+
+            aws ecr get-login-password \
+              --region ap-south-2 \
+              | docker login \
+                  --username AWS \
+                  --password-stdin \
+                  "${ECR_REGISTRY}"
+
+            # ========================================================
+            # Pull latest Docker image
+            # ========================================================
+            echo "Pulling latest Docker image..."
+
             docker pull "${IMAGE}"
+
+            # ========================================================
+            # Stop existing container
+            # ========================================================
+            echo "Stopping existing container..."
 
             docker stop hinchmart 2>/dev/null || true
             docker rm hinchmart 2>/dev/null || true
 
+            # ========================================================
+            # Start new container
+            # ========================================================
+            echo "Starting new container..."
+
             docker run -d \
               --name hinchmart \
               --restart unless-stopped \
-              -p 9000:9000 \
+              -p 80:9000 \
               -e PORT=9000 \
               -e DB_HOST="${DB_HOST}" \
               -e DB_PORT="${DB_PORT}" \
@@ -100,17 +166,49 @@ jobs:
               -e DB_DDL_AUTO="${DB_DDL_AUTO}" \
               "${IMAGE}"
 
-            for attempt in $(seq 1 12); do
-              if curl --fail --silent --show-error http://localhost:9000/api/health > /dev/null; then
+            # ========================================================
+            # Health check
+            # ========================================================
+            HEALTH_CHECK_URL="http://hello.hinchmart.com/api/health"
+            HEALTH_CHECK_TIMEOUT_SECONDS=600
+            HEALTH_CHECK_INTERVAL_SECONDS=5
+            HEALTH_CHECK_ATTEMPTS=$((HEALTH_CHECK_TIMEOUT_SECONDS / HEALTH_CHECK_INTERVAL_SECONDS))
+
+            echo "Waiting up to ${HEALTH_CHECK_TIMEOUT_SECONDS} seconds for ${HEALTH_CHECK_URL}..."
+
+            for attempt in $(seq 1 "${HEALTH_CHECK_ATTEMPTS}"); do
+
+              if curl \
+                --fail \
+                --silent \
+                --show-error \
+                "${HEALTH_CHECK_URL}" \
+                > /dev/null; then
+
+                echo "=========================================="
                 echo "Health check passed."
+                echo "HinchMart backend is running."
+                echo "=========================================="
+
                 docker image prune --force
                 docker container prune --force
+
                 exit 0
               fi
-              echo "Waiting for application health check (${attempt}/12)..."
-              sleep 5
+
+              echo "Waiting for application health check (${attempt}/${HEALTH_CHECK_ATTEMPTS})..."
+
+              sleep "${HEALTH_CHECK_INTERVAL_SECONDS}"
             done
 
-            echo "Health check failed. Recent container logs:"
+            # ========================================================
+            # Health check failed
+            # ========================================================
+            echo "=========================================="
+            echo "Health check FAILED."
+            echo "Recent container logs:"
+            echo "=========================================="
+
             docker logs --tail 100 hinchmart
+
             exit 1
