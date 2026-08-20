@@ -48,6 +48,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public Auth Endpoints
                 .requestMatchers("/api/auth/**").permitAll()
+                // Container and load-balancer health checks
+                .requestMatchers("/api/health").permitAll()
                 // Public Catalog Endpoints
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/subcategories/**").permitAll()
