@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,6 @@ public class PaymentController {
     }
 
     @PostMapping("/create")
-    @PreAuthorize("hasAnyRole('BUYER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Create Payment Order",
             description = "Initializes payment. Automatically recalculates and enforces the exact order total from the database, ignoring client-sent amounts.")
     public ResponseEntity<ApiResponse<PaymentDto>> createPayment(Authentication authentication,
@@ -45,7 +43,6 @@ public class PaymentController {
     }
 
     @PostMapping("/verify")
-    @PreAuthorize("hasAnyRole('BUYER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Verify Payment & Confirm Order",
             description = "Validates payment signature/gateway response, transitions Order to PAID & CONFIRMED, generates GST Invoice, and dispatches notifications.")
     public ResponseEntity<ApiResponse<PaymentDto>> verifyPayment(Authentication authentication,
@@ -56,7 +53,6 @@ public class PaymentController {
     }
 
     @GetMapping("/order/{orderId}")
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get Payment Details by Order ID", description = "Returns payment record, transactions, and refund status for an order.")
     public ResponseEntity<ApiResponse<PaymentDto>> getPaymentByOrderId(Authentication authentication,
                                                                        @PathVariable Long orderId) {
@@ -66,7 +62,6 @@ public class PaymentController {
     }
 
     @PostMapping("/{id}/refund")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Process Payment Refund", description = "Issues a full or partial refund for a successful payment transaction.")
     public ResponseEntity<ApiResponse<RefundDto>> processRefund(Authentication authentication,
                                                                 @PathVariable Long id,

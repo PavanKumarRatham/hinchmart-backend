@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +28,6 @@ public class InvoiceController {
     }
 
     @GetMapping("/orders/{id}/invoice")
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get GST Tax Invoice for Order",
             description = "Retrieves the complete GST tax invoice for an order including HSN codes, quantity, CGST/SGST (intra-state) or IGST (inter-state) breakdown, and seller/buyer GSTINs.")
     public ResponseEntity<ApiResponse<InvoiceDto>> getOrderInvoice(Authentication authentication,
@@ -40,7 +38,6 @@ public class InvoiceController {
     }
 
     @PostMapping("/admin/orders/{id}/generate-invoice")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Generate / Regenerate GST Invoice (Admin)",
             description = "Admin manual trigger to generate or regenerate the GST Tax Invoice for an order.")
     public ResponseEntity<ApiResponse<InvoiceDto>> generateInvoiceAdmin(@PathVariable Long id) {

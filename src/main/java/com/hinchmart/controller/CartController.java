@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/cart")
 @Tag(name = "Cart & B2B Calculations (Member 2)", description = "Endpoints for Buyer Shopping Cart, MOQ Validations, Bulk Pricing Tier Calculations, and GST Breakdown")
 @SecurityRequirement(name = "Bearer Authentication")
-@PreAuthorize("hasAnyRole('BUYER', 'ADMIN', 'SUPER_ADMIN')")
 public class CartController {
 
     private final CartService cartService;

@@ -19,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +28,6 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 @Tag(name = "Admin Operations", description = "Endpoints for Admin Dashboard, Seller Approvals & KYC, Product Approvals, and User Management")
 @SecurityRequirement(name = "Bearer Authentication")
-@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 public class AdminController {
 
     private final UserService userService;

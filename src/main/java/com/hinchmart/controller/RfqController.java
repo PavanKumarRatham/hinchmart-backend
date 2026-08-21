@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +35,6 @@ public class RfqController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('BUYER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Submit a new RFQ (Request for Quotation)",
             description = "Creates a new RFQ with multiple line items, required quantities, units, and delivery requirements.")
     public ResponseEntity<ApiResponse<RfqDto>> createRfq(Authentication authentication,
@@ -47,7 +45,6 @@ public class RfqController {
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasAnyRole('BUYER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get My RFQs", description = "Retrieves all RFQs submitted by the currently logged-in buyer.")
     public ResponseEntity<ApiResponse<List<RfqDto>>> getMyRfqs(Authentication authentication) {
         User user = authService.getCurrentUser(authentication.getName());
@@ -65,7 +62,6 @@ public class RfqController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "List all Marketplace RFQs (Seller / Admin)", description = "Returns all marketplace RFQs with pagination for sellers to bid/quote.")
     public ResponseEntity<ApiResponse<Page<RfqDto>>> getAllRfqs(
             @RequestParam(defaultValue = "0") int page,

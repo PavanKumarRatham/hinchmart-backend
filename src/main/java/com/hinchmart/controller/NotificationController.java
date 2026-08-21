@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +34,6 @@ public class NotificationController {
     }
 
     @GetMapping("/notifications")
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get User Notifications", description = "Returns a paginated list of notifications for the authenticated user.")
     public ResponseEntity<ApiResponse<Page<NotificationDto>>> getNotifications(
             Authentication authentication,
@@ -48,7 +46,6 @@ public class NotificationController {
     }
 
     @GetMapping("/notifications/unread")
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get Unread Notifications", description = "Returns all unread notifications for quick notification badge updates.")
     public ResponseEntity<ApiResponse<List<NotificationDto>>> getUnreadNotifications(Authentication authentication) {
         User user = authService.getCurrentUser(authentication.getName());
@@ -57,7 +54,6 @@ public class NotificationController {
     }
 
     @PatchMapping("/notifications/{id}/read")
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Mark Notification as Read", description = "Marks a single notification as read.")
     public ResponseEntity<ApiResponse<NotificationDto>> markAsRead(Authentication authentication,
                                                                    @PathVariable Long id) {
@@ -67,7 +63,6 @@ public class NotificationController {
     }
 
     @PatchMapping("/notifications/read-all")
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Mark All Notifications as Read", description = "Marks all unread notifications for the user as read.")
     public ResponseEntity<ApiResponse<Void>> markAllAsRead(Authentication authentication) {
         User user = authService.getCurrentUser(authentication.getName());
@@ -76,7 +71,6 @@ public class NotificationController {
     }
 
     @PostMapping("/devices/push-token")
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Register Device Push Token", description = "Registers or updates an FCM device token for receiving mobile/web push notifications.")
     public ResponseEntity<ApiResponse<Void>> registerPushToken(Authentication authentication,
                                                                @Valid @RequestBody RegisterDeviceTokenRequest request) {

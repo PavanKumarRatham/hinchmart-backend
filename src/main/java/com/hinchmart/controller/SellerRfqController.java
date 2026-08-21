@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/seller/rfqs")
 @Tag(name = "Seller RFQ Quotations (Member 2)", description = "Endpoints for Sellers to browse marketplace RFQs and submit quotation bids")
 @SecurityRequirement(name = "Bearer Authentication")
-@PreAuthorize("hasAnyRole('SELLER', 'ADMIN', 'SUPER_ADMIN')")
 public class SellerRfqController {
 
     private final RfqQuoteService rfqQuoteService;

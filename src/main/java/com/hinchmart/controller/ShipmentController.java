@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +35,6 @@ public class ShipmentController {
     }
 
     @PostMapping("/seller/orders/{id}/shipment")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Create Shipment for Order (Seller)",
             description = "Seller creates shipment, books carrier, generates tracking/AWB numbers, and sets order status to READY_TO_SHIP.")
     public ResponseEntity<ApiResponse<ShipmentDto>> createShipment(Authentication authentication,
@@ -49,7 +47,6 @@ public class ShipmentController {
     }
 
     @GetMapping("/orders/{id}/tracking")
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get Order Tracking History",
             description = "Retrieves live courier tracking status, carrier info, estimated delivery date, and chronological checkpoint events.")
     public ResponseEntity<ApiResponse<ShipmentDto>> getTracking(Authentication authentication,
@@ -60,7 +57,6 @@ public class ShipmentController {
     }
 
     @PatchMapping("/seller/shipments/{id}/status")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Update Shipment Milestone Status",
             description = "Updates shipment milestone (e.g. PICKED_UP, IN_TRANSIT, REACHED_DESTINATION, OUT_FOR_DELIVERY, DELIVERED), syncs order status, and logs notifications.")
     public ResponseEntity<ApiResponse<ShipmentDto>> updateStatus(Authentication authentication,
@@ -72,7 +68,6 @@ public class ShipmentController {
     }
 
     @GetMapping("/admin/shipments")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "List All Shipments (Admin)", description = "Returns all marketplace shipments with status filtering and pagination.")
     public ResponseEntity<ApiResponse<Page<ShipmentDto>>> getAdminShipments(
             @RequestParam(required = false) ShipmentStatus status,

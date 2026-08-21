@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/seller")
 @Tag(name = "Seller Operations (Member 1)", description = "Endpoints for Seller Store, Dashboard Metrics, and Product Upload & Management")
 @SecurityRequirement(name = "Bearer Authentication")
-@PreAuthorize("hasAnyRole('SELLER', 'ADMIN', 'SUPER_ADMIN')")
 public class SellerController {
 
     private final SellerService sellerService;

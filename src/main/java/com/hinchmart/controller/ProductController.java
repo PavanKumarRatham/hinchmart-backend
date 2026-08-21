@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,7 +80,6 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Create Product (Seller / Admin)", description = "Adds a new product with unit MOQ, GST %, and multi-tier bulk pricing.")
     public ResponseEntity<ApiResponse<ProductDto>> createProduct(Authentication authentication,
@@ -92,7 +90,6 @@ public class ProductController {
     }
 
     @PutMapping("/products/{id}")
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN', 'SUPER_ADMIN')")
     @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Update Product (Seller / Admin)", description = "Updates an existing product catalog entry.")
     public ResponseEntity<ApiResponse<ProductDto>> updateProduct(Authentication authentication,
