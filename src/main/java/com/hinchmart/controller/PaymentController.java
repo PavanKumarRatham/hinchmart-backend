@@ -1,5 +1,4 @@
 package com.hinchmart.controller;
-
 import com.hinchmart.dto.request.PaymentCreateRequest;
 import com.hinchmart.dto.request.PaymentVerifyRequest;
 import com.hinchmart.dto.request.RefundRequest;
@@ -10,7 +9,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/payments")
 @Tag(name = "Payment & Refund Operations (Member 1)", description = "Endpoints for Payment Initiation, Signature Verification, Gateway Transactions, and Refunds")
-@SecurityRequirement(name = "Bearer Authentication")
 public class PaymentController {
 
     private final PaymentService paymentService;

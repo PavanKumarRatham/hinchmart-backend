@@ -6,7 +6,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.RfqQuoteService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,7 +16,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/buyer")
 @Tag(name = "Buyer RFQ Quotes & Acceptance (Member 2)", description = "Endpoints for Buyers to compare quotes submitted by multiple sellers and accept/reject them")
-@SecurityRequirement(name = "Bearer Authentication")
 public class BuyerRfqQuoteController {
 
     private final RfqQuoteService rfqQuoteService;

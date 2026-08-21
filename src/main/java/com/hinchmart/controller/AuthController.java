@@ -11,7 +11,6 @@ import com.hinchmart.dto.response.UserDto;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.OtpService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -78,7 +77,6 @@ public class AuthController {
 
     @GetMapping("/me")
     @Operation(summary = "Get Current Authenticated User", description = "Returns full profile of the logged-in user.")
-    @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<ApiResponse<UserDto>> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return new ResponseEntity<>(ApiResponse.error("Unauthenticated"), HttpStatus.UNAUTHORIZED);

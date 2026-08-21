@@ -7,7 +7,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -22,7 +21,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Notification & Device Management (Member 2)", description = "Endpoints for In-App Notifications, Push Token Registration, and Read Status Updates")
-@SecurityRequirement(name = "Bearer Authentication")
 public class NotificationController {
 
     private final NotificationService notificationService;

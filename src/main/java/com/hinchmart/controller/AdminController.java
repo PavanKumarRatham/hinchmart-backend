@@ -11,7 +11,6 @@ import com.hinchmart.entity.enums.SellerStatus;
 import com.hinchmart.service.ProductService;
 import com.hinchmart.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -27,7 +26,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin")
 @Tag(name = "Admin Operations", description = "Endpoints for Admin Dashboard, Seller Approvals & KYC, Product Approvals, and User Management")
-@SecurityRequirement(name = "Bearer Authentication")
 public class AdminController {
 
     private final UserService userService;

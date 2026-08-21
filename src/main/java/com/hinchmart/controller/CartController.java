@@ -8,7 +8,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/cart")
 @Tag(name = "Cart & B2B Calculations (Member 2)", description = "Endpoints for Buyer Shopping Cart, MOQ Validations, Bulk Pricing Tier Calculations, and GST Breakdown")
-@SecurityRequirement(name = "Bearer Authentication")
 public class CartController {
 
     private final CartService cartService;

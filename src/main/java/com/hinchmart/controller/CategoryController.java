@@ -7,7 +7,6 @@ import com.hinchmart.dto.response.CategoryDto;
 import com.hinchmart.dto.response.SubcategoryDto;
 import com.hinchmart.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -59,7 +58,6 @@ public class CategoryController {
     // ==========================================
 
     @GetMapping("/admin/categories")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "List all Categories for Admin (including inactive)", description = "Returns all categories for admin management.")
     public ResponseEntity<ApiResponse<List<CategoryDto>>> getAllCategoriesForAdmin() {
         List<CategoryDto> categories = categoryService.getAllCategoriesForAdmin();
@@ -67,7 +65,6 @@ public class CategoryController {
     }
 
     @PostMapping("/admin/categories")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Add Category (Admin)", description = "Creates a new category in the catalog.")
     public ResponseEntity<ApiResponse<CategoryDto>> createCategory(@Valid @RequestBody CategoryCreateRequest request) {
         CategoryDto created = categoryService.createCategory(request);
@@ -75,7 +72,6 @@ public class CategoryController {
     }
 
     @PutMapping("/admin/categories/{id}")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Edit Category (Admin)", description = "Updates an existing category.")
     public ResponseEntity<ApiResponse<CategoryDto>> updateCategory(
             @PathVariable Long id,
@@ -85,7 +81,6 @@ public class CategoryController {
     }
 
     @PatchMapping("/admin/categories/{id}/status")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Activate / Deactivate Category (Admin)", description = "Toggles category active status.")
     public ResponseEntity<ApiResponse<CategoryDto>> toggleCategoryStatus(
             @PathVariable Long id,
@@ -96,7 +91,6 @@ public class CategoryController {
     }
 
     @PutMapping("/admin/categories/{id}/order")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Change Category Display Order (Admin)", description = "Updates display order sequence.")
     public ResponseEntity<ApiResponse<CategoryDto>> updateCategoryOrder(
             @PathVariable Long id,
@@ -107,7 +101,6 @@ public class CategoryController {
     }
 
     @PutMapping("/admin/categories/{id}/image")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Upload / Update Category Image URL (Admin)", description = "Updates the category image URL.")
     public ResponseEntity<ApiResponse<CategoryDto>> updateCategoryImage(
             @PathVariable Long id,
@@ -118,7 +111,6 @@ public class CategoryController {
     }
 
     @PostMapping("/admin/categories/{id}/subcategories")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Add Subcategory to Category (Admin)", description = "Creates a new subcategory.")
     public ResponseEntity<ApiResponse<SubcategoryDto>> createSubcategory(
             @PathVariable Long id,
@@ -129,7 +121,6 @@ public class CategoryController {
     }
 
     @PutMapping("/admin/subcategories/{id}")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Edit Subcategory (Admin)", description = "Updates an existing subcategory.")
     public ResponseEntity<ApiResponse<SubcategoryDto>> updateSubcategory(
             @PathVariable Long id,
@@ -139,7 +130,6 @@ public class CategoryController {
     }
 
     @PatchMapping("/admin/subcategories/{id}/status")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Activate / Deactivate Subcategory (Admin)", description = "Toggles subcategory active status.")
     public ResponseEntity<ApiResponse<SubcategoryDto>> toggleSubcategoryStatus(
             @PathVariable Long id,

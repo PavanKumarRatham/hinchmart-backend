@@ -10,7 +10,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 @Tag(name = "User & Profile Management", description = "Endpoints for Buyer and Seller Profile Management")
-@SecurityRequirement(name = "Bearer Authentication")
 public class UserController {
 
     private final UserService userService;

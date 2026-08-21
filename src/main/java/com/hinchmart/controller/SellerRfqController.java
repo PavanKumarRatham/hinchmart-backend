@@ -8,7 +8,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.RfqQuoteService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/seller/rfqs")
 @Tag(name = "Seller RFQ Quotations (Member 2)", description = "Endpoints for Sellers to browse marketplace RFQs and submit quotation bids")
-@SecurityRequirement(name = "Bearer Authentication")
 public class SellerRfqController {
 
     private final RfqQuoteService rfqQuoteService;

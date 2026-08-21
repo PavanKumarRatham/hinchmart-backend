@@ -9,7 +9,6 @@ import com.hinchmart.entity.enums.ShipmentStatus;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.ShipmentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Logistics & Shipments (Member 2)", description = "Endpoints for Seller Shipment Booking, Courier Tracking, Milestone Status Transitions, and Logistics Management")
-@SecurityRequirement(name = "Bearer Authentication")
 public class ShipmentController {
 
     private final ShipmentService shipmentService;

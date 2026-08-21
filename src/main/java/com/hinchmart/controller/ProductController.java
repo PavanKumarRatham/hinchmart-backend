@@ -9,7 +9,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -80,7 +79,6 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Create Product (Seller / Admin)", description = "Adds a new product with unit MOQ, GST %, and multi-tier bulk pricing.")
     public ResponseEntity<ApiResponse<ProductDto>> createProduct(Authentication authentication,
                                                                  @Valid @RequestBody ProductCreateRequest request) {
@@ -90,7 +88,6 @@ public class ProductController {
     }
 
     @PutMapping("/products/{id}")
-    @SecurityRequirement(name = "Bearer Authentication")
     @Operation(summary = "Update Product (Seller / Admin)", description = "Updates an existing product catalog entry.")
     public ResponseEntity<ApiResponse<ProductDto>> updateProduct(Authentication authentication,
                                                                  @PathVariable Long id,

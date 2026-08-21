@@ -11,7 +11,6 @@ import com.hinchmart.service.AuthService;
 import com.hinchmart.service.ProductService;
 import com.hinchmart.service.SellerService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/seller")
 @Tag(name = "Seller Operations (Member 1)", description = "Endpoints for Seller Store, Dashboard Metrics, and Product Upload & Management")
-@SecurityRequirement(name = "Bearer Authentication")
 public class SellerController {
 
     private final SellerService sellerService;

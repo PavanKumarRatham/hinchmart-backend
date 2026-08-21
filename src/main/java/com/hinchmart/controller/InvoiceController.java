@@ -6,7 +6,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.InvoiceService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "GST Invoice Management (Member 1)", description = "Endpoints for B2B GST Tax Invoice Generation, CGST/SGST/IGST breakdowns, and Tax Compliance")
-@SecurityRequirement(name = "Bearer Authentication")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;

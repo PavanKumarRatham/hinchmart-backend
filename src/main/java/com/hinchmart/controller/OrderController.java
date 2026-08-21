@@ -8,7 +8,6 @@ import com.hinchmart.entity.User;
 import com.hinchmart.service.AuthService;
 import com.hinchmart.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/orders")
 @Tag(name = "Order Management (Member 2)", description = "Endpoints for Order Placement, Order Tracking, Status Transitions, and Fulfillment")
-@SecurityRequirement(name = "Bearer Authentication")
 public class OrderController {
 
     private final OrderService orderService;
