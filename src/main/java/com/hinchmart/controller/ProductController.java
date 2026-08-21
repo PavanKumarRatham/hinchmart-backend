@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -80,19 +79,19 @@ public class ProductController {
 
     @PostMapping("/products")
     @Operation(summary = "Create Product (Seller / Admin)", description = "Adds a new product with unit MOQ, GST %, and multi-tier bulk pricing.")
-    public ResponseEntity<ApiResponse<ProductDto>> createProduct(Authentication authentication,
+    public ResponseEntity<ApiResponse<ProductDto>> createProduct(@RequestParam Long userId,
                                                                  @Valid @RequestBody ProductCreateRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         ProductDto created = productService.createProduct(user.getId(), request);
         return new ResponseEntity<>(ApiResponse.success("Product created successfully", created), HttpStatus.CREATED);
     }
 
     @PutMapping("/products/{id}")
     @Operation(summary = "Update Product (Seller / Admin)", description = "Updates an existing product catalog entry.")
-    public ResponseEntity<ApiResponse<ProductDto>> updateProduct(Authentication authentication,
+    public ResponseEntity<ApiResponse<ProductDto>> updateProduct(@RequestParam Long userId,
                                                                  @PathVariable Long id,
                                                                  @RequestBody ProductUpdateRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         ProductDto updated = productService.updateProduct(id, user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Product updated successfully", updated));
     }

@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,9 +27,9 @@ public class InvoiceController {
     @GetMapping("/orders/{id}/invoice")
     @Operation(summary = "Get GST Tax Invoice for Order",
             description = "Retrieves the complete GST tax invoice for an order including HSN codes, quantity, CGST/SGST (intra-state) or IGST (inter-state) breakdown, and seller/buyer GSTINs.")
-    public ResponseEntity<ApiResponse<InvoiceDto>> getOrderInvoice(Authentication authentication,
+    public ResponseEntity<ApiResponse<InvoiceDto>> getOrderInvoice(@RequestParam Long userId,
                                                                    @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         InvoiceDto invoice = invoiceService.getInvoiceByOrderId(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(invoice));
     }

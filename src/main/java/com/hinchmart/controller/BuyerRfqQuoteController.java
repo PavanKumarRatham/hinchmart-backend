@@ -8,7 +8,6 @@ import com.hinchmart.service.RfqQuoteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,9 +29,9 @@ public class BuyerRfqQuoteController {
     @Operation(summary = "List Seller Quotes for Buyer RFQ",
             description = "Returns all quotations submitted by various sellers (e.g. Seller A ₹58,500, Seller B ₹59,200, Seller C ₹58,000) for comparison.")
     public ResponseEntity<ApiResponse<List<RfqQuoteDto>>> getQuotesForRfq(
-            Authentication authentication,
+            @RequestParam Long userId,
             @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         List<RfqQuoteDto> quotes = rfqQuoteService.getBuyerQuotesForRfq(user.getId(), id);
         return ResponseEntity.ok(ApiResponse.success(quotes));
     }
@@ -41,9 +40,9 @@ public class BuyerRfqQuoteController {
     @Operation(summary = "Accept Seller RFQ Quotation",
             description = "Accepts a chosen seller quotation, rejects competing quotes on that RFQ, and closes the RFQ.")
     public ResponseEntity<ApiResponse<RfqQuoteDto>> acceptQuote(
-            Authentication authentication,
+            @RequestParam Long userId,
             @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         RfqQuoteDto accepted = rfqQuoteService.acceptQuote(user.getId(), id);
         return ResponseEntity.ok(ApiResponse.success("Quotation accepted successfully", accepted));
     }
@@ -51,9 +50,9 @@ public class BuyerRfqQuoteController {
     @PostMapping("/quotes/{id}/reject")
     @Operation(summary = "Reject Seller RFQ Quotation", description = "Rejects a specific seller quotation.")
     public ResponseEntity<ApiResponse<RfqQuoteDto>> rejectQuote(
-            Authentication authentication,
+            @RequestParam Long userId,
             @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         RfqQuoteDto rejected = rfqQuoteService.rejectQuote(user.getId(), id);
         return ResponseEntity.ok(ApiResponse.success("Quotation rejected", rejected));
     }

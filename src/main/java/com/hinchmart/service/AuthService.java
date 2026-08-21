@@ -146,9 +146,9 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public User getCurrentUser(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
     }
 
     public UserDto mapToUserDto(User user) {

@@ -94,10 +94,12 @@ public class ProductControllerTest {
     public void testSellerCreatesProductWithBulkPrices() throws Exception {
         // 1. Login as Seller
         LoginRequest loginRequest = new LoginRequest("seller@tata.com", "Seller@123");
-        mockMvc.perform(post("/api/auth/login")
+        String loginResponse = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Long sellerUserId = objectMapper.readTree(loginResponse).path("data").path("id").asLong();
 
         // 2. Create Product
         ProductCreateRequest request = new ProductCreateRequest();
@@ -118,7 +120,7 @@ public class ProductControllerTest {
         BulkPriceTierDto tier2 = new BulkPriceTierDto(10, null, new BigDecimal("59000.00"), new BigDecimal("2.48"));
         request.setBulkPrices(List.of(tier1, tier2));
 
-        mockMvc.perform(post("/api/products")
+        mockMvc.perform(post("/api/products").param("userId", sellerUserId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())

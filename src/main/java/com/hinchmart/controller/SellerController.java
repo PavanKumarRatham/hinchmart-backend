@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -46,26 +45,26 @@ public class SellerController {
     @PostMapping("/store")
     @Operation(summary = "Create Seller Store",
             description = "Creates a seller store. Requires seller status to be APPROVED. If verification is pending, returns an error.")
-    public ResponseEntity<ApiResponse<SellerStoreDto>> createStore(Authentication authentication,
+    public ResponseEntity<ApiResponse<SellerStoreDto>> createStore(@RequestParam Long userId,
                                                                    @Valid @RequestBody SellerStoreRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         SellerStoreDto store = sellerService.createStore(user.getId(), request);
         return new ResponseEntity<>(ApiResponse.success("Store created successfully", store), HttpStatus.CREATED);
     }
 
     @GetMapping("/store")
-    @Operation(summary = "Get Seller Store", description = "Retrieves the authenticated seller's store profile.")
-    public ResponseEntity<ApiResponse<SellerStoreDto>> getStore(Authentication authentication) {
-        User user = authService.getCurrentUser(authentication.getName());
+    @Operation(summary = "Get Seller Store", description = "Retrieves the specified seller's store profile.")
+    public ResponseEntity<ApiResponse<SellerStoreDto>> getStore(@RequestParam Long userId) {
+        User user = authService.getUserById(userId);
         SellerStoreDto store = sellerService.getStore(user.getId());
         return ResponseEntity.ok(ApiResponse.success(store));
     }
 
     @PutMapping("/store")
     @Operation(summary = "Update Seller Store", description = "Updates store name, logo, banner, description, and contact info.")
-    public ResponseEntity<ApiResponse<SellerStoreDto>> updateStore(Authentication authentication,
+    public ResponseEntity<ApiResponse<SellerStoreDto>> updateStore(@RequestParam Long userId,
                                                                    @RequestBody SellerStoreRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         SellerStoreDto store = sellerService.updateStore(user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Store updated successfully", store));
     }
@@ -77,8 +76,8 @@ public class SellerController {
     @GetMapping("/dashboard")
     @Operation(summary = "Get Seller Dashboard Metrics",
             description = "Returns real-time aggregated metrics: Total Products, Active Products, Pending Approval, Total Orders, New Orders, Open RFQs, Revenue, Low Stock Products, Recent Orders.")
-    public ResponseEntity<ApiResponse<SellerDashboardDto>> getDashboard(Authentication authentication) {
-        User user = authService.getCurrentUser(authentication.getName());
+    public ResponseEntity<ApiResponse<SellerDashboardDto>> getDashboard(@RequestParam Long userId) {
+        User user = authService.getUserById(userId);
         SellerDashboardDto dashboard = sellerService.getSellerDashboard(user.getId());
         return ResponseEntity.ok(ApiResponse.success(dashboard));
     }
@@ -90,17 +89,17 @@ public class SellerController {
     @PostMapping("/products")
     @Operation(summary = "Upload Product by Seller",
             description = "Submits a new product catalog entry with bulk tiers and MOQ. Created product will have approval_status = PENDING.")
-    public ResponseEntity<ApiResponse<ProductDto>> uploadProduct(Authentication authentication,
+    public ResponseEntity<ApiResponse<ProductDto>> uploadProduct(@RequestParam Long userId,
                                                                  @Valid @RequestBody ProductCreateRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         ProductDto created = productService.createProduct(user.getId(), request);
         return new ResponseEntity<>(ApiResponse.success("Product submitted successfully for admin review", created), HttpStatus.CREATED);
     }
 
     @GetMapping("/products")
-    @Operation(summary = "List Seller Products", description = "Returns all products uploaded by the authenticated seller with status filtering and pagination.")
+    @Operation(summary = "List Seller Products", description = "Returns all products uploaded by the specified seller with status filtering and pagination.")
     public ResponseEntity<ApiResponse<Page<ProductDto>>> getMyProducts(
-            Authentication authentication,
+            @RequestParam Long userId,
             @RequestParam(required = false) ApprovalStatus status,
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) String query,
@@ -108,7 +107,7 @@ public class SellerController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "id,desc") String sort) {
 
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         String[] sortParams = sort.split(",");
         String sortField = sortParams[0];
         Sort.Direction sortDirection = sortParams.length > 1 && "asc".equalsIgnoreCase(sortParams[1]) ?
@@ -121,38 +120,38 @@ public class SellerController {
 
     @GetMapping("/products/{id}")
     @Operation(summary = "Get Seller Product by ID", description = "Retrieves details of a product uploaded by the seller.")
-    public ResponseEntity<ApiResponse<ProductDto>> getProductById(Authentication authentication,
+    public ResponseEntity<ApiResponse<ProductDto>> getProductById(@RequestParam Long userId,
                                                                  @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         ProductDto product = productService.getSellerProductById(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(product));
     }
 
     @PutMapping("/products/{id}")
     @Operation(summary = "Update Seller Product", description = "Updates details, pricing, bulk tiers, and stock of a seller product.")
-    public ResponseEntity<ApiResponse<ProductDto>> updateProduct(Authentication authentication,
+    public ResponseEntity<ApiResponse<ProductDto>> updateProduct(@RequestParam Long userId,
                                                                  @PathVariable Long id,
                                                                  @Valid @RequestBody ProductUpdateRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         ProductDto updated = productService.updateProduct(id, user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Product updated successfully", updated));
     }
 
     @DeleteMapping("/products/{id}")
     @Operation(summary = "Delete Seller Product", description = "Deletes a product uploaded by the seller.")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(Authentication authentication,
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@RequestParam Long userId,
                                                            @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         productService.deleteProduct(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success("Product deleted successfully", null));
     }
 
     @PatchMapping("/products/{id}/status")
     @Operation(summary = "Toggle Seller Product Active Status", description = "Activates or deactivates a product.")
-    public ResponseEntity<ApiResponse<ProductDto>> toggleProductStatus(Authentication authentication,
+    public ResponseEntity<ApiResponse<ProductDto>> toggleProductStatus(@RequestParam Long userId,
                                                                       @PathVariable Long id,
                                                                       @Valid @RequestBody SellerProductStatusRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         ProductDto updated = productService.toggleSellerProductStatus(id, user.getId(), request.getActive());
         return ResponseEntity.ok(ApiResponse.success("Product active status updated", updated));
     }

@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,9 +42,9 @@ public class SellerRfqController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get RFQ Details for Seller", description = "Retrieves details and line items of an RFQ for preparing quotation.")
-    public ResponseEntity<ApiResponse<RfqDto>> getRfqDetails(Authentication authentication,
+    public ResponseEntity<ApiResponse<RfqDto>> getRfqDetails(@RequestParam Long userId,
                                                              @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         RfqDto rfq = rfqQuoteService.getSellerRfqById(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(rfq));
     }
@@ -53,10 +52,10 @@ public class SellerRfqController {
     @PostMapping("/{id}/quote")
     @Operation(summary = "Submit RFQ Quotation",
             description = "Submits a seller quotation bid for an RFQ specifying price, GST percentage, delivery charge, and timeline.")
-    public ResponseEntity<ApiResponse<RfqQuoteDto>> submitQuote(Authentication authentication,
+    public ResponseEntity<ApiResponse<RfqQuoteDto>> submitQuote(@RequestParam Long userId,
                                                                 @PathVariable Long id,
                                                                 @Valid @RequestBody CreateRfqQuoteRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         RfqQuoteDto quote = rfqQuoteService.submitQuote(user.getId(), id, request);
         return new ResponseEntity<>(ApiResponse.success("Quotation submitted successfully", quote), HttpStatus.CREATED);
     }

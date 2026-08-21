@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,12 +31,12 @@ public class NotificationController {
     }
 
     @GetMapping("/notifications")
-    @Operation(summary = "Get User Notifications", description = "Returns a paginated list of notifications for the authenticated user.")
+    @Operation(summary = "Get User Notifications", description = "Returns a paginated list of notifications for the specified user.")
     public ResponseEntity<ApiResponse<Page<NotificationDto>>> getNotifications(
-            Authentication authentication,
+            @RequestParam Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         Pageable pageable = PageRequest.of(page, size);
         Page<NotificationDto> notifications = notificationService.getUserNotifications(user.getId(), pageable);
         return ResponseEntity.ok(ApiResponse.success(notifications));
@@ -45,34 +44,34 @@ public class NotificationController {
 
     @GetMapping("/notifications/unread")
     @Operation(summary = "Get Unread Notifications", description = "Returns all unread notifications for quick notification badge updates.")
-    public ResponseEntity<ApiResponse<List<NotificationDto>>> getUnreadNotifications(Authentication authentication) {
-        User user = authService.getCurrentUser(authentication.getName());
+    public ResponseEntity<ApiResponse<List<NotificationDto>>> getUnreadNotifications(@RequestParam Long userId) {
+        User user = authService.getUserById(userId);
         List<NotificationDto> unread = notificationService.getUnreadNotifications(user.getId());
         return ResponseEntity.ok(ApiResponse.success(unread));
     }
 
     @PatchMapping("/notifications/{id}/read")
     @Operation(summary = "Mark Notification as Read", description = "Marks a single notification as read.")
-    public ResponseEntity<ApiResponse<NotificationDto>> markAsRead(Authentication authentication,
+    public ResponseEntity<ApiResponse<NotificationDto>> markAsRead(@RequestParam Long userId,
                                                                    @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         NotificationDto updated = notificationService.markAsRead(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success("Notification marked as read", updated));
     }
 
     @PatchMapping("/notifications/read-all")
     @Operation(summary = "Mark All Notifications as Read", description = "Marks all unread notifications for the user as read.")
-    public ResponseEntity<ApiResponse<Void>> markAllAsRead(Authentication authentication) {
-        User user = authService.getCurrentUser(authentication.getName());
+    public ResponseEntity<ApiResponse<Void>> markAllAsRead(@RequestParam Long userId) {
+        User user = authService.getUserById(userId);
         notificationService.markAllAsRead(user.getId());
         return ResponseEntity.ok(ApiResponse.success("All notifications marked as read", null));
     }
 
     @PostMapping("/devices/push-token")
     @Operation(summary = "Register Device Push Token", description = "Registers or updates an FCM device token for receiving mobile/web push notifications.")
-    public ResponseEntity<ApiResponse<Void>> registerPushToken(Authentication authentication,
+    public ResponseEntity<ApiResponse<Void>> registerPushToken(@RequestParam Long userId,
                                                                @Valid @RequestBody RegisterDeviceTokenRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         notificationService.registerDeviceToken(user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Device push token registered successfully", null));
     }

@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,8 +30,8 @@ public class CartController {
     @GetMapping
     @Operation(summary = "Get Current User Cart",
             description = "Returns current shopping cart with dynamic bulk pricing tiers, MOQ checks, line item subtotals, GST breakdown, and grand total.")
-    public ResponseEntity<ApiResponse<CartDto>> getCart(Authentication authentication) {
-        User user = authService.getCurrentUser(authentication.getName());
+    public ResponseEntity<ApiResponse<CartDto>> getCart(@RequestParam Long userId) {
+        User user = authService.getUserById(userId);
         CartDto cart = cartService.getCart(user.getId());
         return ResponseEntity.ok(ApiResponse.success(cart));
     }
@@ -40,9 +39,9 @@ public class CartController {
     @PostMapping("/items")
     @Operation(summary = "Add Item to Cart",
             description = "Adds a product to the cart. Validates: Quantity >= MOQ, Seller Active & Approved, Product Active & Approved, Stock Availability. Automatically calculates bulk pricing.")
-    public ResponseEntity<ApiResponse<CartDto>> addItem(Authentication authentication,
+    public ResponseEntity<ApiResponse<CartDto>> addItem(@RequestParam Long userId,
                                                         @Valid @RequestBody AddToCartRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         CartDto cart = cartService.addToCart(user.getId(), request);
         return new ResponseEntity<>(ApiResponse.success("Item added to cart", cart), HttpStatus.CREATED);
     }
@@ -50,27 +49,27 @@ public class CartController {
     @PutMapping("/items/{id}")
     @Operation(summary = "Update Cart Item Quantity",
             description = "Updates the quantity of an item in the cart and recalculates bulk pricing tier and GST.")
-    public ResponseEntity<ApiResponse<CartDto>> updateItem(Authentication authentication,
+    public ResponseEntity<ApiResponse<CartDto>> updateItem(@RequestParam Long userId,
                                                            @PathVariable Long id,
                                                            @Valid @RequestBody UpdateCartItemRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         CartDto cart = cartService.updateCartItem(user.getId(), id, request);
         return ResponseEntity.ok(ApiResponse.success("Cart updated", cart));
     }
 
     @DeleteMapping("/items/{id}")
     @Operation(summary = "Remove Item from Cart", description = "Removes a specific line item from the cart.")
-    public ResponseEntity<ApiResponse<CartDto>> removeItem(Authentication authentication,
+    public ResponseEntity<ApiResponse<CartDto>> removeItem(@RequestParam Long userId,
                                                            @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         CartDto cart = cartService.removeCartItem(user.getId(), id);
         return ResponseEntity.ok(ApiResponse.success("Item removed from cart", cart));
     }
 
     @DeleteMapping("/clear")
-    @Operation(summary = "Clear Cart", description = "Removes all items from the current user's shopping cart.")
-    public ResponseEntity<ApiResponse<Void>> clearCart(Authentication authentication) {
-        User user = authService.getCurrentUser(authentication.getName());
+    @Operation(summary = "Clear Cart", description = "Removes all items from the specified user's shopping cart.")
+    public ResponseEntity<ApiResponse<Void>> clearCart(@RequestParam Long userId) {
+        User user = authService.getUserById(userId);
         cartService.clearCart(user.getId());
         return ResponseEntity.ok(ApiResponse.success("Cart cleared successfully", null));
     }

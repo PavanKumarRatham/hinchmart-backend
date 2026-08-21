@@ -37,10 +37,12 @@ public class RfqControllerTest {
     public void testBuyerSubmitsAndRetrievesRfq() throws Exception {
         // 1. Login as Buyer
         LoginRequest loginRequest = new LoginRequest("buyer@demo.com", "Buyer@123");
-        mockMvc.perform(post("/api/auth/login")
+        String loginResponse = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Long buyerUserId = objectMapper.readTree(loginResponse).path("data").path("id").asLong();
 
         // 2. Submit new RFQ
         RfqCreateRequest rfqRequest = new RfqCreateRequest();
@@ -57,7 +59,7 @@ public class RfqControllerTest {
         item.setSpecifications("Standard 12m length bundles with manufacturer test certificate");
         rfqRequest.setItems(List.of(item));
 
-        String rfqResponse = mockMvc.perform(post("/api/rfqs")
+        String rfqResponse = mockMvc.perform(post("/api/rfqs").param("userId", buyerUserId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rfqRequest)))
                 .andExpect(status().isCreated())
@@ -73,15 +75,13 @@ public class RfqControllerTest {
         Long rfqId = objectMapper.readTree(rfqResponse).path("data").path("id").asLong();
 
         // 3. Get My RFQs
-        mockMvc.perform(get("/api/rfqs/my")
-                        )
+        mockMvc.perform(get("/api/rfqs/my").param("userId", buyerUserId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data", hasSize(greaterThanOrEqualTo(1))));
 
         // 4. Get RFQ by ID
-        mockMvc.perform(get("/api/rfqs/" + rfqId)
-                        )
+        mockMvc.perform(get("/api/rfqs/" + rfqId).param("userId", buyerUserId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").value(rfqId))

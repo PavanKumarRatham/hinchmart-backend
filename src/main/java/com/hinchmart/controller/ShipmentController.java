@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,10 +34,10 @@ public class ShipmentController {
     @PostMapping("/seller/orders/{id}/shipment")
     @Operation(summary = "Create Shipment for Order (Seller)",
             description = "Seller creates shipment, books carrier, generates tracking/AWB numbers, and sets order status to READY_TO_SHIP.")
-    public ResponseEntity<ApiResponse<ShipmentDto>> createShipment(Authentication authentication,
+    public ResponseEntity<ApiResponse<ShipmentDto>> createShipment(@RequestParam Long userId,
                                                                    @PathVariable Long id,
                                                                    @RequestBody(required = false) CreateShipmentRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         CreateShipmentRequest req = (request != null) ? request : new CreateShipmentRequest();
         ShipmentDto shipment = shipmentService.createShipment(id, user.getId(), req);
         return new ResponseEntity<>(ApiResponse.success("Shipment booked successfully", shipment), HttpStatus.CREATED);
@@ -47,9 +46,9 @@ public class ShipmentController {
     @GetMapping("/orders/{id}/tracking")
     @Operation(summary = "Get Order Tracking History",
             description = "Retrieves live courier tracking status, carrier info, estimated delivery date, and chronological checkpoint events.")
-    public ResponseEntity<ApiResponse<ShipmentDto>> getTracking(Authentication authentication,
+    public ResponseEntity<ApiResponse<ShipmentDto>> getTracking(@RequestParam Long userId,
                                                                 @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         ShipmentDto tracking = shipmentService.getTrackingByOrderId(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(tracking));
     }
@@ -57,10 +56,10 @@ public class ShipmentController {
     @PatchMapping("/seller/shipments/{id}/status")
     @Operation(summary = "Update Shipment Milestone Status",
             description = "Updates shipment milestone (e.g. PICKED_UP, IN_TRANSIT, REACHED_DESTINATION, OUT_FOR_DELIVERY, DELIVERED), syncs order status, and logs notifications.")
-    public ResponseEntity<ApiResponse<ShipmentDto>> updateStatus(Authentication authentication,
+    public ResponseEntity<ApiResponse<ShipmentDto>> updateStatus(@RequestParam Long userId,
                                                                  @PathVariable Long id,
                                                                  @Valid @RequestBody UpdateShipmentStatusRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         ShipmentDto updated = shipmentService.updateShipmentStatus(id, user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Shipment status updated to " + request.getStatus().name(), updated));
     }

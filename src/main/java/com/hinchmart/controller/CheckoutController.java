@@ -9,7 +9,7 @@ import com.hinchmart.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,9 +32,9 @@ public class CheckoutController {
     @Operation(summary = "Preview Checkout Breakdown",
             description = "Calculates final order costs including bulk price discounts, GST (18%), delivery transport charges, and grand total.")
     public ResponseEntity<ApiResponse<CheckoutPreviewDto>> previewCheckout(
-            Authentication authentication,
+            @RequestParam Long userId,
             @RequestBody(required = false) CheckoutPreviewRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         CheckoutPreviewDto preview = orderService.previewCheckout(user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success(preview));
     }

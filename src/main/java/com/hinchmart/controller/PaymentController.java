@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,9 +31,9 @@ public class PaymentController {
     @PostMapping("/create")
     @Operation(summary = "Create Payment Order",
             description = "Initializes payment. Automatically recalculates and enforces the exact order total from the database, ignoring client-sent amounts.")
-    public ResponseEntity<ApiResponse<PaymentDto>> createPayment(Authentication authentication,
+    public ResponseEntity<ApiResponse<PaymentDto>> createPayment(@RequestParam Long userId,
                                                                  @Valid @RequestBody PaymentCreateRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         PaymentDto payment = paymentService.createPayment(user.getId(), request);
         return new ResponseEntity<>(ApiResponse.success("Payment initiated successfully", payment), HttpStatus.CREATED);
     }
@@ -42,28 +41,28 @@ public class PaymentController {
     @PostMapping("/verify")
     @Operation(summary = "Verify Payment & Confirm Order",
             description = "Validates payment signature/gateway response, transitions Order to PAID & CONFIRMED, generates GST Invoice, and dispatches notifications.")
-    public ResponseEntity<ApiResponse<PaymentDto>> verifyPayment(Authentication authentication,
+    public ResponseEntity<ApiResponse<PaymentDto>> verifyPayment(@RequestParam Long userId,
                                                                  @Valid @RequestBody PaymentVerifyRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         PaymentDto verified = paymentService.verifyPayment(user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Payment verified successfully", verified));
     }
 
     @GetMapping("/order/{orderId}")
     @Operation(summary = "Get Payment Details by Order ID", description = "Returns payment record, transactions, and refund status for an order.")
-    public ResponseEntity<ApiResponse<PaymentDto>> getPaymentByOrderId(Authentication authentication,
+    public ResponseEntity<ApiResponse<PaymentDto>> getPaymentByOrderId(@RequestParam Long userId,
                                                                        @PathVariable Long orderId) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         PaymentDto payment = paymentService.getPaymentByOrderId(orderId, user.getId());
         return ResponseEntity.ok(ApiResponse.success(payment));
     }
 
     @PostMapping("/{id}/refund")
     @Operation(summary = "Process Payment Refund", description = "Issues a full or partial refund for a successful payment transaction.")
-    public ResponseEntity<ApiResponse<RefundDto>> processRefund(Authentication authentication,
+    public ResponseEntity<ApiResponse<RefundDto>> processRefund(@RequestParam Long userId,
                                                                 @PathVariable Long id,
                                                                 @Valid @RequestBody RefundRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         RefundDto refund = paymentService.processRefund(id, user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Refund processed successfully", refund));
     }

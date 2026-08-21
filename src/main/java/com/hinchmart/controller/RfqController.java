@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,26 +34,26 @@ public class RfqController {
     @PostMapping
     @Operation(summary = "Submit a new RFQ (Request for Quotation)",
             description = "Creates a new RFQ with multiple line items, required quantities, units, and delivery requirements.")
-    public ResponseEntity<ApiResponse<RfqDto>> createRfq(Authentication authentication,
+    public ResponseEntity<ApiResponse<RfqDto>> createRfq(@RequestParam Long userId,
                                                          @Valid @RequestBody RfqCreateRequest request) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         RfqDto created = rfqService.createRfq(user.getId(), request);
         return new ResponseEntity<>(ApiResponse.success("RFQ created successfully", created), HttpStatus.CREATED);
     }
 
     @GetMapping("/my")
-    @Operation(summary = "Get My RFQs", description = "Retrieves all RFQs submitted by the currently logged-in buyer.")
-    public ResponseEntity<ApiResponse<List<RfqDto>>> getMyRfqs(Authentication authentication) {
-        User user = authService.getCurrentUser(authentication.getName());
+    @Operation(summary = "Get Buyer RFQs", description = "Retrieves all RFQs submitted by the specified buyer.")
+    public ResponseEntity<ApiResponse<List<RfqDto>>> getMyRfqs(@RequestParam Long userId) {
+        User user = authService.getUserById(userId);
         List<RfqDto> rfqs = rfqService.getMyRfqs(user.getId());
         return ResponseEntity.ok(ApiResponse.success(rfqs));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get RFQ Details by ID", description = "Returns full details and line items for a specific RFQ.")
-    public ResponseEntity<ApiResponse<RfqDto>> getRfqById(Authentication authentication,
+    public ResponseEntity<ApiResponse<RfqDto>> getRfqById(@RequestParam Long userId,
                                                           @PathVariable Long id) {
-        User user = authService.getCurrentUser(authentication.getName());
+        User user = authService.getUserById(userId);
         RfqDto rfq = rfqService.getRfqById(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(rfq));
     }
