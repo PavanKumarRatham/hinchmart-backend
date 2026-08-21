@@ -1,16 +1,12 @@
 package com.hinchmart.service;
 
-import com.hinchmart.config.JwtTokenProvider;
 import com.hinchmart.dto.request.LoginRequest;
-import com.hinchmart.dto.request.RefreshTokenRequest;
 import com.hinchmart.dto.request.RegisterRequest;
 import com.hinchmart.dto.request.VerifyOtpRequest;
-import com.hinchmart.dto.response.AuthResponse;
 import com.hinchmart.dto.response.BuyerProfileDto;
 import com.hinchmart.dto.response.SellerProfileDto;
 import com.hinchmart.dto.response.UserDto;
 import com.hinchmart.entity.BuyerProfile;
-import com.hinchmart.entity.RefreshToken;
 import com.hinchmart.entity.SellerProfile;
 import com.hinchmart.entity.User;
 import com.hinchmart.entity.enums.AccountStatus;
@@ -20,16 +16,12 @@ import com.hinchmart.exception.BadRequestException;
 import com.hinchmart.exception.ResourceNotFoundException;
 import com.hinchmart.exception.UnauthorizedException;
 import com.hinchmart.repository.BuyerProfileRepository;
-import com.hinchmart.repository.RefreshTokenRepository;
 import com.hinchmart.repository.SellerProfileRepository;
 import com.hinchmart.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -37,35 +29,26 @@ public class AuthService {
     private final UserRepository userRepository;
     private final BuyerProfileRepository buyerProfileRepository;
     private final SellerProfileRepository sellerProfileRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider tokenProvider;
     private final OtpService otpService;
     private final ActivityLogService activityLogService;
-
-    @Value("${hinchmart.jwt.refresh-expiration-ms:2592000000}")
-    private long refreshExpirationMs; // 30 days default
 
     public AuthService(UserRepository userRepository,
                        BuyerProfileRepository buyerProfileRepository,
                        SellerProfileRepository sellerProfileRepository,
-                       RefreshTokenRepository refreshTokenRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtTokenProvider tokenProvider,
                        OtpService otpService,
                        ActivityLogService activityLogService) {
         this.userRepository = userRepository;
         this.buyerProfileRepository = buyerProfileRepository;
         this.sellerProfileRepository = sellerProfileRepository;
-        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
-        this.tokenProvider = tokenProvider;
         this.otpService = otpService;
         this.activityLogService = activityLogService;
     }
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public UserDto register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email address is already in use: " + request.getEmail());
         }
@@ -120,22 +103,14 @@ public class AuthService {
             sellerProfileRepository.save(sellerProfile);
         }
 
-        String accessToken = tokenProvider.generateToken(savedUser);
-        RefreshToken refreshToken = createRefreshToken(savedUser);
-
         activityLogService.log(savedUser.getId(), savedUser.getEmail(), "USER_REGISTERED", "USER", savedUser.getId(),
                 "Registered with role " + role.name(), null);
 
-        return new AuthResponse(
-                accessToken,
-                refreshToken.getToken(),
-                tokenProvider.getExpirationMs() / 1000,
-                mapToUserDto(savedUser)
-        );
+        return mapToUserDto(savedUser);
     }
 
     @Transactional
-    public AuthResponse login(LoginRequest request) {
+    public UserDto login(LoginRequest request) {
         User user = userRepository.findByEmailOrPhone(request.getIdentifier(), request.getIdentifier())
                 .orElseThrow(() -> new UnauthorizedException("Invalid email/phone or password"));
 
@@ -151,77 +126,22 @@ public class AuthService {
             throw new UnauthorizedException("Account is inactive. Please verify or activate your account.");
         }
 
-        String accessToken = tokenProvider.generateToken(user);
-        RefreshToken refreshToken = createRefreshToken(user);
-
         activityLogService.log(user.getId(), user.getEmail(), "USER_LOGIN", "USER", user.getId(),
                 "Logged in via password authentication", null);
 
-        return new AuthResponse(
-                accessToken,
-                refreshToken.getToken(),
-                tokenProvider.getExpirationMs() / 1000,
-                mapToUserDto(user)
-        );
+        return mapToUserDto(user);
     }
 
     @Transactional
-    public AuthResponse verifyOtpAndLogin(VerifyOtpRequest request) {
+    public UserDto verifyOtpAndLogin(VerifyOtpRequest request) {
         otpService.verifyOtp(request.getIdentifier(), request.getOtpCode(), request.getPurpose());
 
         User user = userRepository.findByEmailOrPhone(request.getIdentifier(), request.getIdentifier())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found for identifier: " + request.getIdentifier()));
 
-        String accessToken = tokenProvider.generateToken(user);
-        RefreshToken refreshToken = createRefreshToken(user);
-
         activityLogService.log(user.getId(), user.getEmail(), "USER_OTP_LOGIN", "USER", user.getId(),
                 "Logged in via OTP verification", null);
 
-        return new AuthResponse(
-                accessToken,
-                refreshToken.getToken(),
-                tokenProvider.getExpirationMs() / 1000,
-                mapToUserDto(user)
-        );
-    }
-
-    @Transactional
-    public AuthResponse refreshToken(RefreshTokenRequest request) {
-        RefreshToken token = refreshTokenRepository.findByTokenAndRevokedFalse(request.getRefreshToken())
-                .orElseThrow(() -> new UnauthorizedException("Invalid or revoked refresh token"));
-
-        if (token.getExpiryDate().isBefore(Instant.now())) {
-            token.setRevoked(true);
-            refreshTokenRepository.save(token);
-            throw new UnauthorizedException("Refresh token has expired. Please log in again.");
-        }
-
-        User user = token.getUser();
-        String newAccessToken = tokenProvider.generateToken(user);
-
-        return new AuthResponse(
-                newAccessToken,
-                token.getToken(),
-                tokenProvider.getExpirationMs() / 1000,
-                mapToUserDto(user)
-        );
-    }
-
-    @Transactional
-    public void logout(String refreshTokenStr) {
-        if (refreshTokenStr != null && !refreshTokenStr.trim().isEmpty()) {
-            refreshTokenRepository.findByToken(refreshTokenStr).ifPresent(token -> {
-                token.setRevoked(true);
-                refreshTokenRepository.save(token);
-            });
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public UserDto getCurrentUserDto(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
         return mapToUserDto(user);
     }
 
@@ -229,14 +149,6 @@ public class AuthService {
     public User getCurrentUser(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-    }
-
-    private RefreshToken createRefreshToken(User user) {
-        String tokenString = UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
-        Instant expiryDate = Instant.now().plusMillis(refreshExpirationMs);
-
-        RefreshToken refreshToken = new RefreshToken(tokenString, user, expiryDate);
-        return refreshTokenRepository.save(refreshToken);
     }
 
     public UserDto mapToUserDto(User user) {

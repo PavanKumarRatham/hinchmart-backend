@@ -37,13 +37,10 @@ public class RfqControllerTest {
     public void testBuyerSubmitsAndRetrievesRfq() throws Exception {
         // 1. Login as Buyer
         LoginRequest loginRequest = new LoginRequest("buyer@demo.com", "Buyer@123");
-        String responseContent = mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        String token = objectMapper.readTree(responseContent).path("data").path("accessToken").asText();
+                .andExpect(status().isOk());
 
         // 2. Submit new RFQ
         RfqCreateRequest rfqRequest = new RfqCreateRequest();
@@ -61,7 +58,6 @@ public class RfqControllerTest {
         rfqRequest.setItems(List.of(item));
 
         String rfqResponse = mockMvc.perform(post("/api/rfqs")
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rfqRequest)))
                 .andExpect(status().isCreated())
@@ -78,14 +74,14 @@ public class RfqControllerTest {
 
         // 3. Get My RFQs
         mockMvc.perform(get("/api/rfqs/my")
-                        .header("Authorization", "Bearer " + token))
+                        )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data", hasSize(greaterThanOrEqualTo(1))));
 
         // 4. Get RFQ by ID
         mockMvc.perform(get("/api/rfqs/" + rfqId)
-                        .header("Authorization", "Bearer " + token))
+                        )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").value(rfqId))

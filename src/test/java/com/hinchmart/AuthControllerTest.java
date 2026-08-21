@@ -17,8 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,7 +55,6 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.data.user.email").value(email))
                 .andExpect(jsonPath("$.data.user.role").value("BUYER"))
                 .andExpect(jsonPath("$.data.user.buyerProfile.companyName").value("Test Buildcon"));
@@ -69,8 +66,7 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.data.refreshToken").isNotEmpty());
+                .andExpect(jsonPath("$.data.user.email").value(email));
     }
 
     @Test
@@ -117,27 +113,6 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(verifyOtpRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.data.user.email").value("buyer@demo.com"));
-    }
-
-    @Test
-    public void testGetMeWithToken() throws Exception {
-        // Login as demo buyer
-        LoginRequest loginRequest = new LoginRequest("buyer@demo.com", "Buyer@123");
-        String responseContent = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        String token = objectMapper.readTree(responseContent).path("data").path("accessToken").asText();
-
-        mockMvc.perform(get("/api/auth/me")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.email").value("buyer@demo.com"))
-                .andExpect(jsonPath("$.data.buyerProfile.companyName").value("Apex Infra Projects Pvt Ltd"));
     }
 }

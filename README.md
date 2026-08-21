@@ -1,12 +1,12 @@
 # HinchMart — B2B Marketplace Backend
 
-Enterprise-grade B2B Marketplace Backend built with **Java 21**, **Spring Boot 3**, **Spring Security 6 (Stateless JWT)**, **Hibernate / Spring Data JPA**, and **MySQL**.
+Enterprise-grade B2B Marketplace Backend built with **Java 21**, **Spring Boot 3**, **Spring Security 6**, **Hibernate / Spring Data JPA**, and **MySQL**.
 
 ---
 
 ## 🚀 Key Modules & Architecture
 
-### 1. Authentication & Security (Stateless JWT & OTP)
+### 1. Authentication & Security (Password & OTP)
 - Dynamic Role-Based Access Control: `SUPER_ADMIN`, `ADMIN`, `BUYER`, `SELLER`, `SUPPORT`.
 - Email/Password and Mobile + OTP authentication flows.
 - Automated token lifecycle: Access Token (15m - 24h) + Refresh Token rotation.
@@ -46,7 +46,7 @@ Enterprise-grade B2B Marketplace Backend built with **Java 21**, **Spring Boot 3
 ## 🛠️ Tech Stack
 - **Java**: 21 (LTS)
 - **Framework**: Spring Boot 3.3.x
-- **Security**: Spring Security 6, JWT (io.jsonwebtoken)
+- **Security**: Spring Security 6
 - **Database**: MySQL 8.x
 - **ORM**: Hibernate 6 / Spring Data JPA
 - **Documentation**: SpringDoc OpenAPI / Swagger 3
