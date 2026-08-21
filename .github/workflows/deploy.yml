@@ -169,7 +169,7 @@ jobs:
             # ========================================================
             # Health check
             # ========================================================
-            HEALTH_CHECK_URL="http://hello.hinchmart.com/api/health"
+            HEALTH_CHECK_URL="https://api.hinchmart.com/api/health"
             HEALTH_CHECK_TIMEOUT_SECONDS=600
             HEALTH_CHECK_INTERVAL_SECONDS=5
             HEALTH_CHECK_ATTEMPTS=$((HEALTH_CHECK_TIMEOUT_SECONDS / HEALTH_CHECK_INTERVAL_SECONDS))
