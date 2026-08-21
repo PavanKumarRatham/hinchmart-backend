@@ -156,7 +156,7 @@ jobs:
             docker run -d \
               --name hinchmart \
               --restart unless-stopped \
-              -p 80:9000 \
+              -p 9000:9000 \
               -e PORT=9000 \
               -e DB_HOST="${DB_HOST}" \
               -e DB_PORT="${DB_PORT}" \
