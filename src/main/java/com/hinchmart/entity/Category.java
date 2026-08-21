@@ -25,7 +25,7 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", length = 1000)
     private String imageUrl;
 
     @Column(name = "display_order")
