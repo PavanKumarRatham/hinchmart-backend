@@ -24,8 +24,6 @@ public class DataInitializer implements CommandLineRunner {
     private final InventoryRepository inventoryRepository;
     private final DeliveryPartnerRepository deliveryPartnerRepository;
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final ShipmentRepository shipmentRepository;
     private final ShipmentTrackingRepository shipmentTrackingRepository;
     private final NotificationRepository notificationRepository;
@@ -44,8 +42,6 @@ public class DataInitializer implements CommandLineRunner {
                            InventoryRepository inventoryRepository,
                            DeliveryPartnerRepository deliveryPartnerRepository,
                            OrderRepository orderRepository,
-                           OrderItemRepository orderItemRepository,
-                           OrderStatusHistoryRepository orderStatusHistoryRepository,
                            ShipmentRepository shipmentRepository,
                            ShipmentTrackingRepository shipmentTrackingRepository,
                            NotificationRepository notificationRepository,
@@ -63,8 +59,6 @@ public class DataInitializer implements CommandLineRunner {
         this.inventoryRepository = inventoryRepository;
         this.deliveryPartnerRepository = deliveryPartnerRepository;
         this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.shipmentRepository = shipmentRepository;
         this.shipmentTrackingRepository = shipmentTrackingRepository;
         this.notificationRepository = notificationRepository;

@@ -19,23 +19,17 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final CartService cartService;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final NotificationService notificationService;
 
     public OrderService(OrderRepository orderRepository,
-                        OrderItemRepository orderItemRepository,
-                        OrderStatusHistoryRepository orderStatusHistoryRepository,
                         CartService cartService,
                         CartRepository cartRepository,
                         CartItemRepository cartItemRepository,
                         NotificationService notificationService) {
         this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.cartService = cartService;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
